@@ -1,0 +1,49 @@
+version: "3.7"
+networks:
+  default:
+    driver: bridge
+    name: api-net
+    ipam: 
+      driver: default
+      config:
+      - subnet: 172.5.0.0/24
+
+volumes:
+  sqllog: {}
+  sqldata: {}
+  sqlsecrets: {}
+
+services:
+  money:
+    build: Api.Money/
+    hostname: host-money
+    restart: unless-stopped
+    depends_on:
+      - sql
+    ports: 
+      - 5000:80
+    networks:
+      - default
+
+  sql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=XzZmwbwF8hrj
+      - SA_PASSWORD=XzZmwbwF8hrj
+    hostname: host-sql
+    restart: unless-stopped  
+    ports: 
+      - 1433:1433
+    networks:
+      - default
+
+  rate:
+    build: ApiRate/
+    hostname: host-rate
+    restart: unless-stopped
+    ports: 
+      - 5001:80
+    networks: 
+      - default
+
